@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class StudentController {
@@ -22,6 +23,15 @@ public class StudentController {
     @GetMapping("/courses/{courseId}/students")
     public List<Student> getStudentsByCourseId(@PathVariable Long courseId) {
         return studentRepository.findByCourseId(courseId);
+    }
+
+    @GetMapping("/courses/{courseId}/students/{studentId}")
+    public Student getCourse(@PathVariable Long studentId) {
+        Optional<Student> student = studentRepository.findById(studentId);
+
+        if (!student.isPresent())
+            throw new ResourceNotFoundException("Student not found with id " + studentId);
+        return student.get();
     }
 
     @PostMapping("/courses/{courseId}/students")

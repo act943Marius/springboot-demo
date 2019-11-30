@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 public class CourseController {
@@ -21,6 +22,14 @@ public class CourseController {
         return courseRepository.findAll(pageable);
     }
 
+    @GetMapping("/courses/{courseId}")
+    public Course getCourse(@PathVariable Long courseId) {
+        Optional<Course> course = courseRepository.findById(courseId);
+
+        if (!course.isPresent())
+            throw new ResourceNotFoundException("Course not found with id " + courseId);
+        return course.get();
+    }
 
     @PostMapping("/courses")
     public Course createCourse(@Valid @RequestBody Course course) {
@@ -31,10 +40,10 @@ public class CourseController {
     public Course updateCourse(@PathVariable Long courseId,
                                    @Valid @RequestBody Course courseRequest) {
         return courseRepository.findById(courseId)
-                .map(question -> {
-                    question.setTitle(courseRequest.getTitle());
-                    question.setDescription(courseRequest.getDescription());
-                    return courseRepository.save(question);
+                .map(course -> {
+                    course.setTitle(courseRequest.getTitle());
+                    course.setDescription(courseRequest.getDescription());
+                    return courseRepository.save(course);
                 }).orElseThrow(() -> new ResourceNotFoundException("Course not found with id " + courseId));
     }
 
@@ -42,8 +51,8 @@ public class CourseController {
     @DeleteMapping("/courses/{courseId}")
     public ResponseEntity<?> deleteCourses(@PathVariable Long courseId) {
         return courseRepository.findById(courseId)
-                .map(question -> {
-                    courseRepository.delete(question);
+                .map(course -> {
+                    courseRepository.delete(course);
                     return ResponseEntity.ok().build();
                 }).orElseThrow(() -> new ResourceNotFoundException("Course not found with id " + courseId));
     }
